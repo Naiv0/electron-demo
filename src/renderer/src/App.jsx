@@ -1,35 +1,50 @@
-import Versions from './components/Versions'
-import electronLogo from './assets/electron.svg'
+import { useEffect, useState } from "react"
+import { Link } from "react-router";
+import { useNavigate } from "react-router-dom";
+import logo from './assets/logo.png'
 
 function App() {
-  const ipcHandle = () => window.electron.ipcRenderer.send('ping')
+  const navigate = useNavigate();
+  const [partners, setPartners] = useState([]);
+  useEffect(() => {
+    (async () => {
+      const res = await window.api.getPartners()
+      console.log(res)
+      setPartners(res)
+    })()
+  }, [])
 
   return (
     <>
-      <img alt="logo" className="logo" src={electronLogo} />
-      <div className="creator">Powered by electron-vite</div>
-      <div className="text">
-        Build an Electron app with <span className="react">React</span>
+      <div className="page-heading">
+        <img className="page-logo" src={logo} alt="" />
+        <h1>Партнеры</h1>
       </div>
-      <p className="tip">
-        Please try pressing <code>F12</code> to open the devTool
-      </p>
-      <div className="actions">
-        <div className="action">
-          <a href="https://electron-vite.org/" target="_blank" rel="noreferrer">
-            Documentation
-          </a>
-        </div>
-        <div className="action">
-          <a target="_blank" rel="noreferrer" onClick={ipcHandle}>
-            Send IPC
-          </a>
-        </div>
-      </div>
-      <Versions></Versions>
+      <ul className="partners-list">
+        {partners.map((partner) => {
+          return <li className="partner-card" key={partner.id} onClick={() => { navigate('/update', { state: { partner } }) }}>
+            <div className="partner-data">
+              <p className="card_heading">{partner.organization_type} | {partner.name}</p>
+              <div className="partner-data-info">
+                <p>{partner.ceo}</p>
+                <p>{partner.phone}</p>
+                <p>Рейтинг: {partner.rating}</p>
+              </div>
+            </div>
+            <div className="partner-sale partner-data card_heading">
+              {partner.discount}%
+            </div>
+          </li>
+        })}
+      </ul>
+
+      <Link to={'/create'}>
+        <button>
+          Создать партнера
+        </button>
+      </Link>
     </>
   )
 }
 
 export default App
-
